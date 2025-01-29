@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>To-Do List with Search</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #ff5845;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .container {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 16px;
+      width: 400px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    input[type="text"] {
+      width: calc(100% - 100px);
+      padding: 12px;
+      font-size: 16px;
+      border: none;
+      border-radius: 12px;
+      background-color: #f2f2f2;
+      outline: none;
+    }
+    button {
+      padding: 10px 15px;
+      font-size: 16px;
+      background-color: #ff5757;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      outline: none;
+    }
+    button:hover {
+      background-color: #e04b4b;
+    }
+    .search-container {
+      display: flex;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+    .search-bar {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 12px;
+      background-color: #f2f2f2;
+      font-size: 16px;
+      margin-right: 10px;
+    }
+    .search-bar:focus {
+      outline: none;
+    }
+    .search-btn {
+      padding: 10px 15px;
+      font-size: 16px;
+      background-color: #333;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+    }
+    .search-btn:hover {
+      background-color: #444;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    li {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px;
+      border-radius: 12px;
+      background-color: #f8f8f8;
+      margin-bottom: 10px;
+    }
+    li span {
+      flex: 1;
+      margin-left: 12px;
+      text-align: left;
+      font-size: 16px;
+      color: #333;
+    }
+    input[type="checkbox"] {
+      transform: scale(1.5);
+    }
+    .menu {
+      position: relative;
+      cursor: pointer;
+    }
+    .menu-dots {
+      font-size: 20px;
+      line-height: 10px;
+    }
+    .menu-options {
+      display: none;
+      position: absolute;
+      right: 0;
+      top: 20px;
+      background: #ff5845;
+      border: 1px solid #ddd;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+      z-index: 10;
+    }
+    .menu-options button {
+      padding: 10px;
+      font-size: 14px;
+      background: none;
+      border: none;
+      width: 100%;
+      text-align: left;
+      cursor: pointer;
+      border-radius: 8px;
+      outline: none;
+    }
+    .menu-options button:hover {
+      background-color: #e04b4b;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <input type="text" id="taskInput" placeholder="Add your task">
+      <button id="addTaskButton">ADD</button>
+    </div>
+    <div class="search-container">
+      <input type="text" id="searchInput" class="search-bar" placeholder="Search tasks...">
+    </div>
+    <ul id="taskList"></ul>
+  </div>
+
+  <script>
+    const taskInput = document.getElementById('taskInput');
+    const addTaskButton = document.getElementById('addTaskButton');
+    const taskList = document.getElementById('taskList');
+    const searchInput = document.getElementById('searchInput');
+
+    addTaskButton.addEventListener('click', () => {
+      const taskText = taskInput.value.trim();
+      if (taskText === '') return;
+
+      const listItem = document.createElement('li');
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+
+      const taskSpan = document.createElement('span');
+      taskSpan.textContent = taskText;
+
+      const menu = document.createElement('div');
+      menu.className = 'menu';
+
+      const menuDots = document.createElement('span');
+      menuDots.className = 'menu-dots';
+      menuDots.textContent = '⋮';
+      menu.appendChild(menuDots);
+
+      const menuOptions = document.createElement('div');
+      menuOptions.className = 'menu-options';
+
+      const editButton = document.createElement('button');
+      editButton.textContent = 'Edit';
+      editButton.addEventListener('click', () => {
+        const editInput = document.createElement('input');
+        editInput.type = 'text';
+        editInput.value = taskSpan.textContent;
+        taskSpan.replaceWith(editInput);
+
+        editInput.addEventListener('blur', () => {
+          const newTaskText = editInput.value.trim();
+          if (newTaskText) {
+            taskSpan.textContent = newTaskText;
+            editInput.replaceWith(taskSpan);
+          } else {
+            taskList.removeChild(listItem);
+          }
+        });
+
+        editInput.focus();
+        menuOptions.style.display = 'none';
+      });
+
+      const deleteButton = document.createElement('button');
+      deleteButton.textContent = 'Delete';
+      deleteButton.addEventListener('click', () => {
+        taskList.removeChild(listItem);
+      });
+
+      menuOptions.appendChild(editButton);
+      menuOptions.appendChild(deleteButton);
+      menu.appendChild(menuOptions);
+
+      menuDots.addEventListener('click', () => {
+        menuOptions.style.display =
+          menuOptions.style.display === 'block' ? 'none' : 'block';
+      });
+
+      listItem.appendChild(checkbox);
+      listItem.appendChild(taskSpan);
+      listItem.appendChild(menu);
+
+      taskList.appendChild(listItem);
+      taskInput.value = '';
+    });
+
+    
+    searchInput.addEventListener('input', () => {
+      const searchTerm = searchInput.value.trim().toLowerCase();
+      const tasks = document.querySelectorAll('#taskList li');
+
+      tasks.forEach((task) => {
+        const taskText = task.querySelector('span').textContent.toLowerCase();
+        if (taskText.startsWith(searchTerm)) {
+          task.style.display = 'flex'; 
+        } else {
+          task.style.display = 'none'; 
+        }
+      });
+
+      if (searchTerm === '') {
+        tasks.forEach((task) => {
+          task.style.display = 'flex'; 
+        });
+      }
+    });
+  </script>
+</body>
+</html>
